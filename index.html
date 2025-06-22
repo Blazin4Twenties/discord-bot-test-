@@ -5,72 +5,165 @@
     <title>Discord Bot Command Browser</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; background: #23272a; color: #fff; margin: 0; }
-        .container { max-width: 800px; margin:40px auto; background: #2c2f33; border-radius: 10px; padding: 30px 30px 20px 30px; box-shadow: 0 8px 24px rgba(0,0,0,.2);}
-        h1 { text-align: center; font-weight: 700; }
-        .commands-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 16px;
-        }
-        .commands-table th, .commands-table td {
-            padding: 12px 8px;
-            border-bottom: 1px solid #444;
-        }
-        .commands-table th {
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
             background: #23272a;
+            color: #fff;
+            margin: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            background: #2c2f33;
+            border-radius: 12px;
+            padding: 32px 34px 24px 34px;
+            box-shadow: 0 8px 24px rgba(0,0,0,.21);
+        }
+        h1 {
+            text-align: center;
+            font-weight: 800;
+            font-size: 2.7rem;
+            letter-spacing: 1px;
+            margin-top: 0;
+            margin-bottom: 22px;
+            text-shadow: 0 2px 12px #1118, 0 1px 0 #0004;
+        }
+        /* Spicy Admin Notice */
+        .locked-notice {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 10px;
+            background: linear-gradient(90deg, #3a2c12 55%, #4e3513 100%);
+            border: 2.5px solid #ffaa2b;
+            border-radius: 18px;
+            padding: 32px 30px 22px 30px;
+            margin: 34px 0 36px 0;
+            text-align: center;
+            box-shadow: 0 10px 32px 0 #f7b20022, 0 2px 9px #0009;
+            color: #ffb93e;
+            font-weight: bold;
+            font-size: 1.22em;
+            position: relative;
+            animation: glowBox 2.5s ease-in-out infinite alternate;
+        }
+        @keyframes glowBox {
+            from { box-shadow: 0 10px 32px 0 #f7b20022, 0 2px 9px #0009; }
+            to   { box-shadow: 0 0px 60px 0 #ffcf2e44, 0 2px 9px #0009; }
+        }
+        .locked-icon {
+            font-size: 2.7em;
+            display: block;
+            margin-bottom: 0.2em;
+            color: #ffcc4d;
+            filter: drop-shadow(0 0 12px #ffcf2e77);
+            animation: shakeLock 1.5s infinite alternate;
+        }
+        @keyframes shakeLock {
+            0% { transform: rotate(-7deg); }
+            100% { transform: rotate(7deg); }
+        }
+        .locked-heading {
+            font-size: 1.5em;
+            color: #ffcc4d;
+            font-weight: 900;
+            letter-spacing: 1.5px;
+            margin-bottom: 0.38em;
+            text-shadow: 0 0 8px #f5e8c3;
+            display: block;
+        }
+        .locked-desc {
+            color: #ffad42;
+            font-size: 1.07em;
             font-weight: 600;
-            text-align: left;
+            margin-top: 0.55em;
+            line-height: 1.5;
+        }
+        .admin-highlight {
+            color: #ffaa2b;
+            font-weight: 700;
+        }
+        .member-highlight {
+            color: #43b581;
+            font-weight: 700;
         }
         .role-input-section {
             display: flex;
             justify-content: center;
             gap: 8px;
-            margin-top: 16px;
+            margin-top: 12px;
             margin-bottom: 8px;
         }
         .check-btn {
             background: #43b581;
             color: #fff;
             border: none;
-            padding: 8px 18px;
-            border-radius: 5px;
+            padding: 8px 22px;
+            border-radius: 7px;
             cursor: pointer;
-            font-size: 1rem;
+            font-size: 1.08rem;
+            font-weight: 600;
+            box-shadow: 0 2px 8px #1a5a3ae9;
+            transition: background .15s, transform .13s;
         }
-        .info { text-align: center; color: #aaa; margin-bottom: 14px;}
-        .locked-notice {
-            color: #faa61a;
-            background: #3a2c12;
-            border-radius: 6px;
-            padding: 12px 20px;
-            margin: 18px 0 24px 0;
-            font-size: 1.08em;
-            text-align: center;
-            border: 1.5px solid #faa61a;
-            font-weight: bold;
+        .check-btn:hover {
+            background: #36a06b;
+            transform: translateY(-2px) scale(1.04);
+        }
+        .role-input-section label {
+            font-size: 1.05em;
+        }
+        .role-input-section .member-role-label {
+            color: #43b581;
+            font-weight: 700;
+            margin-left: 2px;
+        }
+        .commands-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 16px;
+            background: #222426;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 8px #000a;
+        }
+        .commands-table th, .commands-table td {
+            padding: 14px 10px;
+            border-bottom: 1px solid #444;
+        }
+        .commands-table th {
+            background: #23272a;
+            font-weight: 700;
+            color: #ffd77b;
+            text-align: left;
+            font-size: 1.12em;
+        }
+        .commands-table td {
+            font-size: 1.03em;
         }
         @media (max-width: 600px) {
-            .container { padding: 10px; }
-            .commands-table th, .commands-table td { font-size: .9rem; padding: 8px 4px;}
+            .container { padding: 8px; }
+            .commands-table th, .commands-table td { font-size: .93rem; padding: 9px 3px;}
+            .locked-notice { padding: 20px 8px 18px 8px; font-size: .99em; }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Discord Bot Command Browser</h1>
-        <div class="info">
-            Select your role to view available bot commands.<br>
-            <small>(This does not log you into Discord or fetch live role data.)</small>
-        </div>
         <div class="locked-notice">
-            <strong>Admin Commands are locked.<br>
-            If you're a current Admin you will receive them via Direct Message, otherwise you can view the Members Commands only.</strong>
+            <span class="locked-icon">🔒</span>
+            <span class="locked-heading">Admin Commands are Locked</span>
+            <div class="locked-desc">
+                If you're a current <span class="admin-highlight">Admin</span>, you will receive them via <b>Direct Message</b>.<br>
+                <span style="color:#fff;">Otherwise, you can view the <span class="member-highlight">Members Commands</span> only.</span>
+            </div>
         </div>
         <form id="role-check-form" class="role-input-section" autocomplete="off" onsubmit="return false;">
             <label>
                 <input type="checkbox" id="member-role" value="265252010524278786">
-                Member (<span style="color:#43b581">@member</span>)
+                <span class="member-role-label">@member</span>
             </label>
             <button class="check-btn" onclick="checkRoles()">Show Commands</button>
         </form>
