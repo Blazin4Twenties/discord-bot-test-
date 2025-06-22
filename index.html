@@ -56,16 +56,37 @@
             font-size: 1rem;
         }
         .info { text-align: center; color: #aaa; margin-bottom: 14px;}
-        .notice {
-            color: #faa61a;
+        .admin-access-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .admin-access-section input[type="password"] {
+            padding: 8px;
+            border-radius: 5px;
+            border: none;
+            width: 220px;
+            font-size: 1rem;
             background: #23272a;
-            border: 1px solid #faa61a;
-            border-radius: 7px;
-            padding: 18px 16px;
-            margin: 20px 0;
+            color: #fff;
+            outline: none;
+        }
+        .locked-notice {
+            color: #faa61a;
+            background: #3a2c12;
+            border-radius: 6px;
+            padding: 12px 20px;
+            margin: 12px 0;
+            font-size: 1.05em;
             text-align: center;
-            font-size: 1.1em;
-            font-weight: 600;
+            border: 1.5px solid #faa61a;
+        }
+        .password-error {
+            color: #e74c3c;
+            font-size: 0.95em;
+            margin-top: 4px;
         }
         @media (max-width: 600px) {
             .container { padding: 10px; }
@@ -77,7 +98,7 @@
     <div class="container">
         <h1>Discord Bot Command Browser</h1>
         <div class="info">
-            Select your role to see available bot commands.<br>
+            Select your role to view available bot commands.<br>
             <small>(This does not log you into Discord or fetch live role data.)</small>
         </div>
         <form id="role-check-form" class="role-input-section" autocomplete="off" onsubmit="return false;">
@@ -87,20 +108,33 @@
             </label>
             <button class="check-btn" onclick="checkRoles()">Show Commands</button>
         </form>
+
+        <div class="admin-access-section">
+            <div class="locked-notice" id="admin-lock-notice">
+                <strong>Admin Commands are locked.</strong><br>
+                To unlock the secrets of admin power, please consult with a server administrator and obtain the mystical access password.<br>
+                Only those worthy may proceed beyond this point!
+            </div>
+            <input type="password" id="admin-password" placeholder="Enter Admin Access Password">
+            <button class="check-btn" onclick="tryUnlockAdmin()">Unlock Admin Commands</button>
+            <div class="password-error" id="password-error" style="display:none;"></div>
+        </div>
+
         <div id="switcher-row" class="switcher" style="display:none">
             <button id="adminBtn" class="switch-btn" onclick="showCommands('admin')">Admin Commands</button>
             <button id="memberBtn" class="switch-btn" onclick="showCommands('member')">Member Commands</button>
         </div>
         <div id="adminCommandsList" class="command-list">
             <h2>Admin Commands <span style="font-size:0.8em; color:#faa61a;">(Requires <code>@admin</code> role)</span></h2>
-            <div class="notice">
-                <span style="font-size:1.2em;">🚫 Looking to unlock the secrets of Admin power?</span><br>
-                Admin-level access is reserved for our trusted guardians of order.<br>
-                If you believe you require these privileges, please reach out to an Administrator.<br>
-                <span style="font-size:0.98em; color:#fff; display:block; margin-top:4px;">
-                    Only with their blessing will you wield the mighty Admin role!
-                </span>
-            </div>
+            <table class="commands-table">
+                <thead>
+                    <tr>
+                        <th>Command</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody id="admin-commands-body"></tbody>
+            </table>
         </div>
         <div id="memberCommandsList" class="command-list">
             <h2>Member Commands <span style="font-size:0.8em; color:#43b581;">(Requires <code>@member</code> role)</span></h2>
@@ -117,7 +151,6 @@
     </div>
     <script>
         // ---- Commands data ----
-        // Admin commands exist for completeness, but not shown to users directly now
         const adminCommands = [
             { name: '`/forceping`', value: 'Ping used for @admin only.<@&324025299631079426>' },
             { name: '`/forcegame`', value: 'Forcefully ping and unleash chaos mode on a user.<@&324025299631079426>' },
@@ -178,42 +211,71 @@
             }
         }
 
-        // ---- Role logic ----
+        // ---- Show member commands or both ----
         function checkRoles() {
             const isMember = document.getElementById('member-role').checked;
+            const isAdminUnlocked = sessionStorage.getItem('adminUnlocked') === 'true';
 
             // Show/hide switcher and lists
             const switcher = document.getElementById('switcher-row');
             const adminList = document.getElementById('adminCommandsList');
             const memberList = document.getElementById('memberCommandsList');
+            const adminBtn = document.getElementById('adminBtn');
+            const memberBtn = document.getElementById('memberBtn');
 
-            // Only show switcher if both roles exist in future, here just member
-            switcher.style.display = '';
-            document.getElementById('adminBtn').style.display = '';
-            document.getElementById('memberBtn').style.display = '';
-
-            // Always show Admin tab, but member tab only if checked
-            if (isMember) {
-                showCommands('member');
-            } else {
+            // If both roles: show switcher, else only show one
+            if (isAdminUnlocked && isMember) {
+                switcher.style.display = '';
                 showCommands('admin');
+            } else if (isAdminUnlocked) {
+                switcher.style.display = '';
+                showCommands('admin');
+                memberBtn.style.display = 'none';
+            } else if (isMember) {
+                switcher.style.display = '';
+                showCommands('member');
+                adminBtn.style.display = 'none';
+            } else {
+                switcher.style.display = 'none';
+                adminList.style.display = 'none';
+                memberList.style.display = 'none';
             }
 
             // Render command tables
+            renderCommands(adminCommands, 'admin-commands-body');
             renderCommands(memberCommands, 'member-commands-body');
 
-            // Hide both lists by default, show relevant one(s)
-            adminList.style.display = '';
-            memberList.style.display = (isMember ? '' : 'none');
+            // Show/hide lists
+            adminList.style.display = isAdminUnlocked ? '' : 'none';
+            memberList.style.display = isMember ? '' : 'none';
 
             // Activate proper switcher button
-            document.getElementById('adminBtn').style.display = '';
-            document.getElementById('memberBtn').style.display = isMember ? '' : 'none';
+            adminBtn.style.display = isAdminUnlocked ? '' : 'none';
+            memberBtn.style.display = isMember ? '' : 'none';
 
-            // Save user role in session (for page refreshes, optional)
+            // Save member role in session (for page refresh)
             sessionStorage.setItem('isMember', isMember);
+        }
 
-            return false;
+        // ---- Password unlock logic ----
+        function tryUnlockAdmin() {
+            const password = document.getElementById('admin-password').value;
+            const errorDiv = document.getElementById('password-error');
+            // CHANGE THIS PASSWORD to your secret
+            const correctPassword = "AdminPower!";
+
+            if (password === correctPassword) {
+                sessionStorage.setItem('adminUnlocked', 'true');
+                errorDiv.style.display = 'none';
+                document.getElementById('admin-lock-notice').innerHTML = "<span style='color:#43b581;font-weight:bold;'>Admin access granted! You may now browse the admin commands.</span>";
+                document.getElementById('admin-password').value = "";
+                checkRoles();
+            } else {
+                sessionStorage.setItem('adminUnlocked', 'false');
+                errorDiv.textContent = "Incorrect password. Please try again, or consult a server admin for access.";
+                errorDiv.style.display = 'block';
+                checkRoles();
+            }
         }
 
         // ---- Switcher logic ----
@@ -237,10 +299,12 @@
 
         // ---- Restore session (optional) ----
         window.onload = function() {
+            renderCommands(adminCommands, 'admin-commands-body');
             renderCommands(memberCommands, 'member-commands-body');
             const isMember = sessionStorage.getItem('isMember') === 'true';
+            const isAdminUnlocked = sessionStorage.getItem('adminUnlocked') === 'true';
             document.getElementById('member-role').checked = isMember;
-            if (isMember) checkRoles();
+            if (isMember || isAdminUnlocked) checkRoles();
         };
     </script>
 </body>
