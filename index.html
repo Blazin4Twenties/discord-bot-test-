@@ -46,13 +46,6 @@
             margin-top: 16px;
             margin-bottom: 8px;
         }
-        input[type="text"] {
-            padding: 8px;
-            border-radius: 5px;
-            border: none;
-            width: 220px;
-            font-size: 1rem;
-        }
         .check-btn {
             background: #43b581;
             color: #fff;
@@ -63,6 +56,17 @@
             font-size: 1rem;
         }
         .info { text-align: center; color: #aaa; margin-bottom: 14px;}
+        .notice {
+            color: #faa61a;
+            background: #23272a;
+            border: 1px solid #faa61a;
+            border-radius: 7px;
+            padding: 18px 16px;
+            margin: 20px 0;
+            text-align: center;
+            font-size: 1.1em;
+            font-weight: 600;
+        }
         @media (max-width: 600px) {
             .container { padding: 10px; }
             .commands-table th, .commands-table td { font-size: .9rem; padding: 8px 4px;}
@@ -73,15 +77,10 @@
     <div class="container">
         <h1>Discord Bot Command Browser</h1>
         <div class="info">
-            Enter your Discord name and select your roles to see available bot commands.<br>
+            Select your role to see available bot commands.<br>
             <small>(This does not log you into Discord or fetch live role data.)</small>
         </div>
         <form id="role-check-form" class="role-input-section" autocomplete="off" onsubmit="return false;">
-            <input type="text" id="discord-name" placeholder="Discord Name#0000" required>
-            <label>
-                <input type="checkbox" id="admin-role" value="324025299631079426">
-                Admin (<span style="color:#faa61a">@admin</span>)
-            </label>
             <label>
                 <input type="checkbox" id="member-role" value="265252010524278786">
                 Member (<span style="color:#43b581">@member</span>)
@@ -94,15 +93,14 @@
         </div>
         <div id="adminCommandsList" class="command-list">
             <h2>Admin Commands <span style="font-size:0.8em; color:#faa61a;">(Requires <code>@admin</code> role)</span></h2>
-            <table class="commands-table">
-                <thead>
-                    <tr>
-                        <th>Command</th>
-                        <th>Description</th>
-                    </tr>
-                </thead>
-                <tbody id="admin-commands-body"></tbody>
-            </table>
+            <div class="notice">
+                <span style="font-size:1.2em;">🚫 Looking to unlock the secrets of Admin power?</span><br>
+                Admin-level access is reserved for our trusted guardians of order.<br>
+                If you believe you require these privileges, please reach out to an Administrator.<br>
+                <span style="font-size:0.98em; color:#fff; display:block; margin-top:4px;">
+                    Only with their blessing will you wield the mighty Admin role!
+                </span>
+            </div>
         </div>
         <div id="memberCommandsList" class="command-list">
             <h2>Member Commands <span style="font-size:0.8em; color:#43b581;">(Requires <code>@member</code> role)</span></h2>
@@ -119,6 +117,7 @@
     </div>
     <script>
         // ---- Commands data ----
+        // Admin commands exist for completeness, but not shown to users directly now
         const adminCommands = [
             { name: '`/forceping`', value: 'Ping used for @admin only.<@&324025299631079426>' },
             { name: '`/forcegame`', value: 'Forcefully ping and unleash chaos mode on a user.<@&324025299631079426>' },
@@ -181,53 +180,37 @@
 
         // ---- Role logic ----
         function checkRoles() {
-            const discordName = document.getElementById('discord-name').value.trim();
-            const isAdmin = document.getElementById('admin-role').checked;
             const isMember = document.getElementById('member-role').checked;
-
-            if (!discordName) {
-                alert("Please enter your Discord name.");
-                return false;
-            }
-            if (!isAdmin && !isMember) {
-                alert("Please select at least one role.");
-                return false;
-            }
 
             // Show/hide switcher and lists
             const switcher = document.getElementById('switcher-row');
             const adminList = document.getElementById('adminCommandsList');
             const memberList = document.getElementById('memberCommandsList');
 
-            // Show switcher only if both, else only one list
-            if (isAdmin && isMember) {
-                switcher.style.display = '';
-                showCommands('admin');
-            } else if (isAdmin) {
-                switcher.style.display = '';
-                showCommands('admin');
-                document.getElementById('memberBtn').style.display = 'none';
-            } else if (isMember) {
-                switcher.style.display = '';
+            // Only show switcher if both roles exist in future, here just member
+            switcher.style.display = '';
+            document.getElementById('adminBtn').style.display = '';
+            document.getElementById('memberBtn').style.display = '';
+
+            // Always show Admin tab, but member tab only if checked
+            if (isMember) {
                 showCommands('member');
-                document.getElementById('adminBtn').style.display = 'none';
+            } else {
+                showCommands('admin');
             }
 
             // Render command tables
-            renderCommands(adminCommands, 'admin-commands-body');
             renderCommands(memberCommands, 'member-commands-body');
 
             // Hide both lists by default, show relevant one(s)
-            adminList.style.display = (isAdmin ? '' : 'none');
+            adminList.style.display = '';
             memberList.style.display = (isMember ? '' : 'none');
 
             // Activate proper switcher button
-            document.getElementById('adminBtn').style.display = isAdmin ? '' : 'none';
+            document.getElementById('adminBtn').style.display = '';
             document.getElementById('memberBtn').style.display = isMember ? '' : 'none';
 
             // Save user role in session (for page refreshes, optional)
-            sessionStorage.setItem('discordName', discordName);
-            sessionStorage.setItem('isAdmin', isAdmin);
             sessionStorage.setItem('isMember', isMember);
 
             return false;
@@ -254,17 +237,10 @@
 
         // ---- Restore session (optional) ----
         window.onload = function() {
-            renderCommands(adminCommands, 'admin-commands-body');
             renderCommands(memberCommands, 'member-commands-body');
-            const discordName = sessionStorage.getItem('discordName');
-            const isAdmin = sessionStorage.getItem('isAdmin') === 'true';
             const isMember = sessionStorage.getItem('isMember') === 'true';
-            if (discordName) {
-                document.getElementById('discord-name').value = discordName;
-                document.getElementById('admin-role').checked = isAdmin;
-                document.getElementById('member-role').checked = isMember;
-                if (isAdmin || isMember) checkRoles();
-            }
+            document.getElementById('member-role').checked = isMember;
+            if (isMember) checkRoles();
         };
     </script>
 </body>
