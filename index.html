@@ -41,6 +41,12 @@
             filter: drop-shadow(0 0 8px #FF9800) drop-shadow(0 0 22px #ffb30099);
             will-change: transform, filter;
         }
+        .phoenix.right {
+            /* Flip for right side */
+            transform: scaleX(-1);
+            /* Optional: slightly different animation timing for variety */
+            animation-delay: 1.1s, 1.1s;
+        }
         @keyframes phoenix-float {
             from { transform: translateY(0) scale(1) rotate(-8deg);}
             50%  { transform: translateY(-8px) scale(1.15) rotate(7deg);}
@@ -186,6 +192,7 @@
         <h1>
             <span class="phoenix" title="Phoenix">🐦‍🔥</span>
             Legend of III Bot Commands
+            <span class="phoenix right" title="Phoenix">🐦‍🔥</span>
         </h1>
         <div class="locked-notice">
             <span class="locked-icon" id="lockAnim">
