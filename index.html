@@ -35,44 +35,58 @@
         }
         .phoenix-anim {
             display: inline-block;
-            width: 60px;
-            height: 60px;
-            margin: 0 0.10em;
+            width: 64px;
+            height: 64px;
+            margin: 0 0.15em;
             vertical-align: middle;
-            filter: drop-shadow(0 0 16px #ffb300cc) drop-shadow(0 0 24px #ff980099);
-            /* Extra glow for epic look */
+            filter: drop-shadow(0 0 18px #ff9800cc) drop-shadow(0 0 32px #ff6d00bb);
         }
-        .phoenix-anim svg { width: 60px; height: 60px; }
         .phoenix-anim.right { transform: scaleX(-1); }
+        /* Main phoenix SVG body glow */
         .phoenix-glow {
-            filter: drop-shadow(0 0 12px #ffa72688) drop-shadow(0 0 22px #fff17677);
+            filter: drop-shadow(0 0 20px #ffb300cc) drop-shadow(0 0 32px #fff17655);
         }
         /* Animated wings */
-        .phoenix-wing {
+        .phx-wing {
             transform-box: fill-box;
-            transform-origin: 50% 75%;
+            transform-origin: 50% 82%;
         }
-        .phoenix-wing.left {
-            animation: phoenix-wing-left 1.1s infinite cubic-bezier(.7,0,.3,1) alternate;
+        .phx-wing.left {
+            animation: phx-wing-left 1.2s infinite cubic-bezier(.65,0,.35,1) alternate;
         }
-        .phoenix-anim.right .phoenix-wing.left {
+        .phoenix-anim.right .phx-wing.left {
             animation-delay: 0.45s;
         }
-        .phoenix-wing.right {
-            animation: phoenix-wing-right 1.1s infinite cubic-bezier(.7,0,.3,1) alternate;
+        .phx-wing.right {
+            animation: phx-wing-right 1.2s infinite cubic-bezier(.65,0,.35,1) alternate;
         }
-        .phoenix-anim.right .phoenix-wing.right {
+        .phoenix-anim.right .phx-wing.right {
             animation-delay: 0.45s;
         }
-        @keyframes phoenix-wing-left {
-            0%,100% { transform: rotate(-14deg) scaleY(1);}
-            40% { transform: rotate(-50deg) scaleY(1.12);}
-            60% { transform: rotate(-38deg) scaleY(1.07);}
+        @keyframes phx-wing-left {
+            0%,100% { transform: rotate(-9deg) scaleY(1);}
+            45% { transform: rotate(-42deg) scaleY(1.18);}
+            60% { transform: rotate(-30deg) scaleY(1.05);}
         }
-        @keyframes phoenix-wing-right {
-            0%,100% { transform: rotate(14deg) scaleY(1);}
-            40% { transform: rotate(50deg) scaleY(1.12);}
-            60% { transform: rotate(38deg) scaleY(1.07);}
+        @keyframes phx-wing-right {
+            0%,100% { transform: rotate(9deg) scaleY(1);}
+            45% { transform: rotate(42deg) scaleY(1.18);}
+            60% { transform: rotate(30deg) scaleY(1.05);}
+        }
+        /* Flame flicker for tail and crown */
+        .flame {
+            transform-origin: 50% 100%;
+            animation: flame-flicker 1.1s infinite alternate;
+        }
+        @keyframes flame-flicker {
+            0%,100% { filter: blur(0.3px) brightness(1); }
+            25% { filter: blur(0.6px) brightness(1.15); }
+            50% { filter: blur(1.1px) brightness(1.22); }
+            75% { filter: blur(0.6px) brightness(1.1); }
+        }
+        /* Glow up the head flame a bit more */
+        .crown-flame {
+            filter: drop-shadow(0 0 9px #fff176aa) drop-shadow(0 0 13px #ffa00066);
         }
         /* Rest of your styles... */
         .locked-notice {
@@ -201,68 +215,76 @@
             .commands-table th, .commands-table td { font-size: .93rem; padding: 9px 3px;}
             .locked-notice { padding: 20px 8px 18px 8px; font-size: .99em; }
             h1 { font-size: 1.7rem; }
-            .phoenix-anim { width: 34px; height: 34px;}
+            .phoenix-anim { width: 38px; height: 38px;}
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>
-            <!-- LEFT PHOENIX SVG (animated, stylized, glowing) -->
+            <!-- LEFT PHOENIX SVG (fancy, animated, glowy, like 🐦‍🔥) -->
             <span class="phoenix-anim phoenix-glow" title="Phoenix">
-                <svg viewBox="0 0 60 60" fill="none">
+                <svg viewBox="0 0 64 64" fill="none">
                   <!-- Left Wing -->
-                  <g class="phoenix-wing left">
-                    <path d="M30 25 Q8 12 22 33" fill="#ffc107" stroke="#e65100" stroke-width="2"/>
-                    <path d="M26 30 Q13 7 18 33" fill="#ffd54f" stroke="#e65100" stroke-width="1"/>
+                  <g class="phx-wing left">
+                    <path d="M32 30 Q10 9 25 39" fill="#ffc107" stroke="#e65100" stroke-width="2"/>
+                    <path d="M27 37 Q8 13 18 40" fill="#fff176" stroke="#e65100" stroke-width="1"/>
                   </g>
                   <!-- Right Wing -->
-                  <g class="phoenix-wing right">
-                    <path d="M30 25 Q52 12 38 33" fill="#ffc107" stroke="#e65100" stroke-width="2"/>
-                    <path d="M34 30 Q47 7 42 33" fill="#ffd54f" stroke="#e65100" stroke-width="1"/>
+                  <g class="phx-wing right">
+                    <path d="M32 30 Q54 9 39 39" fill="#ffc107" stroke="#e65100" stroke-width="2"/>
+                    <path d="M37 37 Q56 13 46 40" fill="#fff176" stroke="#e65100" stroke-width="1"/>
                   </g>
                   <!-- Body -->
-                  <ellipse cx="30" cy="36" rx="9" ry="16" fill="#ff9800" stroke="#e65100" stroke-width="2.4"/>
+                  <ellipse cx="32" cy="41" rx="10" ry="17" fill="#ff9800" stroke="#e65100" stroke-width="2.4"/>
                   <!-- Head/Neck -->
-                  <ellipse cx="30" cy="19" rx="5" ry="6" fill="#fff176" stroke="#e65100" stroke-width="1.4"/>
-                  <circle cx="31.5" cy="17.5" r="1.1" fill="#222"/>
+                  <ellipse cx="32" cy="23" rx="4.5" ry="6" fill="#fff176" stroke="#e65100" stroke-width="1.4"/>
+                  <circle cx="33.3" cy="21.1" r="1.1" fill="#222"/>
                   <!-- Crown flame -->
-                  <ellipse cx="30" cy="12" rx="2.2" ry="2.7" fill="#ff9800" stroke="#ffa000" stroke-width="0.8" opacity="0.8"/>
-                  <ellipse cx="30" cy="10" rx="1.1" ry="1.5" fill="#fff176" opacity="0.8"/>
+                  <g class="flame crown-flame">
+                    <ellipse cx="32" cy="14" rx="2.3" ry="2.9" fill="#ff9800" stroke="#ffa000" stroke-width="0.8" opacity="0.8"/>
+                    <ellipse cx="32" cy="12" rx="1.1" ry="1.7" fill="#fff176" opacity="0.82"/>
+                  </g>
                   <!-- Beak -->
-                  <polygon points="34,19 37,19 34,21" fill="#ffd54f" stroke="#e65100" stroke-width="0.5"/>
+                  <polygon points="36,23 39,23 36,25" fill="#ffd54f" stroke="#e65100" stroke-width="0.5"/>
                   <!-- Tail flames -->
-                  <path d="M30,52 Q33,60 22,55 Q30,56 33,60 Q38,55 32,52" fill="#ff6d00" stroke="#e65100" stroke-width="1"/>
-                  <path d="M30,52 Q28,59 36,56 Q32,56 28,60 Q22,54 30,52" fill="#ff9800" stroke="#e65100" stroke-width="0.6"/>
+                  <g class="flame">
+                    <path d="M32,56 Q34,64 23,59 Q32,60 35,64 Q41,59 33,56" fill="#ff6d00" stroke="#e65100" stroke-width="1"/>
+                    <path d="M32,56 Q30,63 39,60 Q35,60 30,64 Q23,58 32,56" fill="#ff9800" stroke="#e65100" stroke-width="0.6"/>
+                  </g>
                 </svg>
             </span>
             <span style="font-size:1em;vertical-align:middle;line-height:1.1;padding:0 0.04em;">Legend of III Bot Commands</span>
             <!-- RIGHT PHOENIX SVG (mirrored)-->
             <span class="phoenix-anim phoenix-glow right" title="Phoenix">
-                <svg viewBox="0 0 60 60" fill="none">
+                <svg viewBox="0 0 64 64" fill="none">
                   <!-- Left Wing (mirrored right) -->
-                  <g class="phoenix-wing left">
-                    <path d="M30 25 Q8 12 22 33" fill="#ffc107" stroke="#e65100" stroke-width="2"/>
-                    <path d="M26 30 Q13 7 18 33" fill="#ffd54f" stroke="#e65100" stroke-width="1"/>
+                  <g class="phx-wing left">
+                    <path d="M32 30 Q10 9 25 39" fill="#ffc107" stroke="#e65100" stroke-width="2"/>
+                    <path d="M27 37 Q8 13 18 40" fill="#fff176" stroke="#e65100" stroke-width="1"/>
                   </g>
                   <!-- Right Wing (mirrored left) -->
-                  <g class="phoenix-wing right">
-                    <path d="M30 25 Q52 12 38 33" fill="#ffc107" stroke="#e65100" stroke-width="2"/>
-                    <path d="M34 30 Q47 7 42 33" fill="#ffd54f" stroke="#e65100" stroke-width="1"/>
+                  <g class="phx-wing right">
+                    <path d="M32 30 Q54 9 39 39" fill="#ffc107" stroke="#e65100" stroke-width="2"/>
+                    <path d="M37 37 Q56 13 46 40" fill="#fff176" stroke="#e65100" stroke-width="1"/>
                   </g>
                   <!-- Body -->
-                  <ellipse cx="30" cy="36" rx="9" ry="16" fill="#ff9800" stroke="#e65100" stroke-width="2.4"/>
+                  <ellipse cx="32" cy="41" rx="10" ry="17" fill="#ff9800" stroke="#e65100" stroke-width="2.4"/>
                   <!-- Head/Neck -->
-                  <ellipse cx="30" cy="19" rx="5" ry="6" fill="#fff176" stroke="#e65100" stroke-width="1.4"/>
-                  <circle cx="31.5" cy="17.5" r="1.1" fill="#222"/>
+                  <ellipse cx="32" cy="23" rx="4.5" ry="6" fill="#fff176" stroke="#e65100" stroke-width="1.4"/>
+                  <circle cx="33.3" cy="21.1" r="1.1" fill="#222"/>
                   <!-- Crown flame -->
-                  <ellipse cx="30" cy="12" rx="2.2" ry="2.7" fill="#ff9800" stroke="#ffa000" stroke-width="0.8" opacity="0.8"/>
-                  <ellipse cx="30" cy="10" rx="1.1" ry="1.5" fill="#fff176" opacity="0.8"/>
+                  <g class="flame crown-flame">
+                    <ellipse cx="32" cy="14" rx="2.3" ry="2.9" fill="#ff9800" stroke="#ffa000" stroke-width="0.8" opacity="0.8"/>
+                    <ellipse cx="32" cy="12" rx="1.1" ry="1.7" fill="#fff176" opacity="0.82"/>
+                  </g>
                   <!-- Beak -->
-                  <polygon points="34,19 37,19 34,21" fill="#ffd54f" stroke="#e65100" stroke-width="0.5"/>
+                  <polygon points="36,23 39,23 36,25" fill="#ffd54f" stroke="#e65100" stroke-width="0.5"/>
                   <!-- Tail flames -->
-                  <path d="M30,52 Q33,60 22,55 Q30,56 33,60 Q38,55 32,52" fill="#ff6d00" stroke="#e65100" stroke-width="1"/>
-                  <path d="M30,52 Q28,59 36,56 Q32,56 28,60 Q22,54 30,52" fill="#ff9800" stroke="#e65100" stroke-width="0.6"/>
+                  <g class="flame">
+                    <path d="M32,56 Q34,64 23,59 Q32,60 35,64 Q41,59 33,56" fill="#ff6d00" stroke="#e65100" stroke-width="1"/>
+                    <path d="M32,56 Q30,63 39,60 Q35,60 30,64 Q23,58 32,56" fill="#ff9800" stroke="#e65100" stroke-width="0.6"/>
+                  </g>
                 </svg>
             </span>
         </h1>
