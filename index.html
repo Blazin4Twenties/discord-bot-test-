@@ -161,13 +161,20 @@
             { name: '`/status`', value: 'Update the statuses of the bots.<@&265252010524278786>' }
         ];
 
+        // ---- Role highlighting utility ----
+        function highlightRoles(text) {
+            return text
+                .replace(/<@&324025299631079426>/g, '<span style="color:#faa61a;font-weight:bold">@admin</span>')
+                .replace(/<@&265252010524278786>/g, '<span style="color:#43b581;font-weight:bold">@member</span>');
+        }
+
         // ---- Command rendering ----
         function renderCommands(list, tbodyId) {
             const tbody = document.getElementById(tbodyId);
             tbody.innerHTML = '';
             for (const cmd of list) {
                 const tr = document.createElement('tr');
-                tr.innerHTML = `<td><code>${cmd.name}</code></td><td>${cmd.value}</td>`;
+                tr.innerHTML = `<td><code>${cmd.name}</code></td><td>${highlightRoles(cmd.value)}</td>`;
                 tbody.appendChild(tr);
             }
         }
