@@ -27,8 +27,29 @@
             margin-top: 0;
             margin-bottom: 22px;
             text-shadow: 0 2px 12px #1118, 0 1px 0 #0004;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5em;
+            position: relative;
         }
-        /* Spicy Admin Notice */
+        .phoenix {
+            display: inline-block;
+            font-size: 1.4em;
+            vertical-align: middle;
+            animation: phoenix-float 2.7s ease-in-out infinite alternate, phoenix-glow 2.7s ease-in-out infinite alternate;
+            filter: drop-shadow(0 0 8px #FF9800) drop-shadow(0 0 22px #ffb30099);
+            will-change: transform, filter;
+        }
+        @keyframes phoenix-float {
+            from { transform: translateY(0) scale(1) rotate(-8deg);}
+            50%  { transform: translateY(-8px) scale(1.15) rotate(7deg);}
+            to { transform: translateY(0) scale(1) rotate(-8deg);}
+        }
+        @keyframes phoenix-glow {
+            from { filter: drop-shadow(0 0 8px #FF9800) drop-shadow(0 0 22px #ffb30099);}
+            to   { filter: drop-shadow(0 0 18px #ffc107) drop-shadow(0 0 40px #ff980077);}
+        }
         .locked-notice {
             display: flex;
             align-items: center;
@@ -56,13 +77,54 @@
             font-size: 2.7em;
             display: block;
             margin-bottom: 0.2em;
-            color: #ffcc4d;
-            filter: drop-shadow(0 0 12px #ffcf2e77);
-            animation: shakeLock 1.5s infinite alternate;
+            height: 1.4em;
+            min-width: 2em;
         }
-        @keyframes shakeLock {
-            0% { transform: rotate(-7deg); }
-            100% { transform: rotate(7deg); }
+        .lock-stack {
+            position: relative;
+            display: inline-block;
+            width: 2em;
+            height: 1.4em;
+        }
+        .lock-emoji, .key-emoji, .unlocked-emoji {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 1.3em;
+            height: 1.3em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.25s, transform 0.4s;
+            font-size: 1em;
+        }
+        .lock-emoji { z-index: 3; color: #ffcc4d; }
+        .key-emoji {
+            z-index: 4;
+            left: 0.95em;
+            top: 0.34em;
+            font-size: 0.9em;
+            color: #ffe164;
+            transition: opacity 0.16s, transform 0.32s;
+        }
+        .unlocked-emoji { z-index: 5; color: #ffe164; }
+        /* Animation classes */
+        .stage-locked .lock-emoji { opacity: 1; }
+        .stage-key .lock-emoji { opacity: 1; }
+        .stage-key .key-emoji { opacity: 1; transform: translateX(-0.1em) rotate(-25deg) scale(1.2);}
+        .stage-unlocked .unlocked-emoji { opacity: 1;}
+        .stage-unlocked .lock-emoji { opacity: 0; }
+        .stage-unlocked .key-emoji { opacity: 0;}
+        /* Key wiggle animation */
+        .stage-key .key-emoji {
+            animation: keywiggle 0.8s;
+        }
+        @keyframes keywiggle {
+            0% { transform: translateX(-0.4em) rotate(-45deg) scale(1.2);}
+            30% { transform: translateX(-0.1em) rotate(-25deg) scale(1.2);}
+            55% { transform: translateX(0) rotate(-20deg) scale(1);}
+            100% { transform: translateX(-0.1em) rotate(-25deg) scale(1.2);}
         }
         .locked-heading {
             font-size: 1.5em;
@@ -87,37 +149,6 @@
         .member-highlight {
             color: #43b581;
             font-weight: 700;
-        }
-        .role-input-section {
-            display: flex;
-            justify-content: center;
-            gap: 8px;
-            margin-top: 12px;
-            margin-bottom: 8px;
-        }
-        .check-btn {
-            background: #43b581;
-            color: #fff;
-            border: none;
-            padding: 8px 22px;
-            border-radius: 7px;
-            cursor: pointer;
-            font-size: 1.08rem;
-            font-weight: 600;
-            box-shadow: 0 2px 8px #1a5a3ae9;
-            transition: background .15s, transform .13s;
-        }
-        .check-btn:hover {
-            background: #36a06b;
-            transform: translateY(-2px) scale(1.04);
-        }
-        .role-input-section label {
-            font-size: 1.05em;
-        }
-        .role-input-section .member-role-label {
-            color: #43b581;
-            font-weight: 700;
-            margin-left: 2px;
         }
         .commands-table {
             width: 100%;
@@ -146,27 +177,30 @@
             .container { padding: 8px; }
             .commands-table th, .commands-table td { font-size: .93rem; padding: 9px 3px;}
             .locked-notice { padding: 20px 8px 18px 8px; font-size: .99em; }
+            h1 { font-size: 1.7rem; }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Discord Bot Command Browser</h1>
+        <h1>
+            <span class="phoenix" title="Phoenix">🐦‍🔥</span>
+            Legend of III Bot Commands
+        </h1>
         <div class="locked-notice">
-            <span class="locked-icon">🔒</span>
+            <span class="locked-icon" id="lockAnim">
+                <span class="lock-stack stage-locked" id="lockStack">
+                    <span class="lock-emoji">🔒</span>
+                    <span class="key-emoji">🔑</span>
+                    <span class="unlocked-emoji">🔓</span>
+                </span>
+            </span>
             <span class="locked-heading">Admin Commands are Locked</span>
             <div class="locked-desc">
                 If you're a current <span class="admin-highlight">Admin</span>, you will receive them via <b>Direct Message</b>.<br>
-                <span style="color:#fff;">Otherwise, you can view the <span class="member-highlight">Members Commands</span> only.</span>
+                <span style="color:#fff;">Otherwise, you will see <span class="member-highlight">Members Commands</span> only.</span>
             </div>
         </div>
-        <form id="role-check-form" class="role-input-section" autocomplete="off" onsubmit="return false;">
-            <label>
-                <input type="checkbox" id="member-role" value="265252010524278786">
-                <span class="member-role-label">@member</span>
-            </label>
-            <button class="check-btn" onclick="checkRoles()">Show Commands</button>
-        </form>
         <div id="memberCommandsList" class="command-list active">
             <h2>Member Commands <span style="font-size:0.8em; color:#43b581;">(Requires <code>@member</code> role)</span></h2>
             <table class="commands-table">
@@ -217,16 +251,24 @@
             }
         }
 
-        // ---- Show commands if checkbox is checked ----
-        function checkRoles() {
-            const isMember = document.getElementById('member-role').checked;
-            const memberList = document.getElementById('memberCommandsList');
-            memberList.style.display = isMember ? '' : 'none';
-        }
-
         // ---- Render member commands on load ----
         window.onload = function() {
             renderCommands(memberCommands, 'member-commands-body');
+
+            // Animated lock + key + unlock cycle
+            const lockStack = document.getElementById('lockStack');
+            let stage = 0;
+            setInterval(() => {
+                lockStack.classList.remove('stage-locked', 'stage-key', 'stage-unlocked');
+                if (stage === 0) {
+                    lockStack.classList.add('stage-locked');
+                } else if (stage === 1) {
+                    lockStack.classList.add('stage-key');
+                } else {
+                    lockStack.classList.add('stage-unlocked');
+                }
+                stage = (stage + 1) % 3;
+            }, 1800);
         };
     </script>
 </body>
