@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Discord Bot Command Browser</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #23272a; color: #fff; margin: 0; }
+        .container { max-width: 800px; margin:40px auto; background: #2c2f33; border-radius: 10px; padding: 30px 30px 20px 30px; box-shadow: 0 8px 24px rgba(0,0,0,.2);}
+        h1 { text-align: center; font-weight: 700; }
+        .switcher { display: flex; justify-content: center; gap: 16px; margin: 24px 0;}
+        .switch-btn {
+            background: #7289da;
+            border: none;
+            color: #fff;
+            font-size: 1rem;
+            padding: 10px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background .15s;
+        }
+        .switch-btn.active, .switch-btn:hover {
+            background: #99aab5;
+            color: #23272a;
+        }
+        .command-list { display: none; margin-top: 18px;}
+        .command-list.active { display: block;}
+        .commands-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 16px;
+        }
+        .commands-table th, .commands-table td {
+            padding: 12px 8px;
+            border-bottom: 1px solid #444;
+        }
+        .commands-table th {
+            background: #23272a;
+            font-weight: 600;
+            text-align: left;
+        }
+        .role-input-section {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 16px;
+            margin-bottom: 8px;
+        }
+        input[type="text"] {
+            padding: 8px;
+            border-radius: 5px;
+            border: none;
+            width: 220px;
+            font-size: 1rem;
+        }
+        .check-btn {
+            background: #43b581;
+            color: #fff;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        .info { text-align: center; color: #aaa; margin-bottom: 14px;}
+        @media (max-width: 600px) {
+            .container { padding: 10px; }
+            .commands-table th, .commands-table td { font-size: .9rem; padding: 8px 4px;}
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Discord Bot Command Browser</h1>
+        <div class="info">
+            Enter your Discord name and select your roles to see available bot commands.<br>
+            <small>(This does not log you into Discord or fetch live role data.)</small>
+        </div>
+        <form id="role-check-form" class="role-input-section" autocomplete="off" onsubmit="return false;">
+            <input type="text" id="discord-name" placeholder="Discord Name#0000" required>
+            <label>
+                <input type="checkbox" id="admin-role" value="324025299631079426">
+                Admin (<span style="color:#faa61a">@admin</span>)
+            </label>
+            <label>
+                <input type="checkbox" id="member-role" value="265252010524278786">
+                Member (<span style="color:#43b581">@member</span>)
+            </label>
+            <button class="check-btn" onclick="checkRoles()">Show Commands</button>
+        </form>
+        <div id="switcher-row" class="switcher" style="display:none">
+            <button id="adminBtn" class="switch-btn" onclick="showCommands('admin')">Admin Commands</button>
+            <button id="memberBtn" class="switch-btn" onclick="showCommands('member')">Member Commands</button>
+        </div>
+        <div id="adminCommandsList" class="command-list">
+            <h2>Admin Commands <span style="font-size:0.8em; color:#faa61a;">(Requires <code>@admin</code> role)</span></h2>
+            <table class="commands-table">
+                <thead>
+                    <tr>
+                        <th>Command</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody id="admin-commands-body"></tbody>
+            </table>
+        </div>
+        <div id="memberCommandsList" class="command-list">
+            <h2>Member Commands <span style="font-size:0.8em; color:#43b581;">(Requires <code>@member</code> role)</span></h2>
+            <table class="commands-table">
+                <thead>
+                    <tr>
+                        <th>Command</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody id="member-commands-body"></tbody>
+            </table>
+        </div>
+    </div>
+    <script>
+        // ---- Commands data ----
+        const adminCommands = [
+            { name: '`/forceping`', value: 'Ping used for @admin only.<@&324025299631079426>' },
+            { name: '`/forcegame`', value: 'Forcefully ping and unleash chaos mode on a user.<@&324025299631079426>' },
+            { name: '`/purge`', value: 'Deletes any message type! <@&324025299631079426>' },
+            { name: '`/warn`', value: 'Warn a user.<@&324025299631079426>' },
+            { name: '`/removewarn`', value: 'Remove a warning from a user.<@&324025299631079426>' },
+            { name: '`/mute`', value: 'Mute a user.<@&324025299631079426>' },
+            { name: '`/unmute`', value: 'Unmute a user.<@&324025299631079426>' },
+            { name: '`/removemutes`', value: 'Remove mutes from a user.<@&324025299631079426>' },
+            { name: '`/timeout `', value: 'Timeout a user.<@&324025299631079426>' },
+            { name: '`/removetimeout`', value: 'remove timeout from a user.<@&324025299631079426>' },
+            { name: '`/kick`', value: 'Kick a user from the server.<@&324025299631079426>' },
+            { name: '`/ticketclose`', value: 'Close a ticket.<@&324025299631079426>' },
+            { name: '`/forceticket`', value: 'Forcefully open a ticket upon a user.<@&324025299631079426>' },
+            { name: '`/announcemnt', value: 'Send a announcment template.<@&324025299631079426>' },
+            { name: '`/edit_announcement`', value: 'Edit a field in the announcement.<@&324025299631079426>' },
+            { name: '`/remove_announcment`', value: 'Remove a field in the announcement.<@&324025299631079426>' },
+            { name: '`/archive`', value: 'Copy existing channel into backup channel.<@&324025299631079426>' },
+            { name: '`/embed`', value: 'Create a custom embed.<@&324025299631079426>' },
+            { name: '`/edit_embeds`', value: 'Edit custom embed.<@&324025299631079426>' },
+            { name: '`/end_giveaway`', value: 'Ends the giveaway.<@&324025299631079426>' },
+            { name: '`/help_announcement`', value: 'Instructions on how to use/edit the announcement.<@&324025299631079426>' },
+            { name: '`/post_status`', value: 'Creates a custom status embed for all bots.<@&324025299631079426>' }
+        ];
+        const memberCommands = [
+            { name: '`/ranklist`', value: 'Display all clan ranks and their emojis.<@&265252010524278786>' },
+            { name: '`/ping`', value: 'Ping @user!<@&265252010524278786>' },
+            { name: '`/game`', value: 'Generates random game phrases or system chaos message.<@&265252010524278786>' },
+            { name: '`/events`', value: 'Create an event announcement in the events channel.<@&265252010524278786>' },
+            { name: '`/feedback`', value: 'Send feedback on the bot or ideas! <@&265252010524278786>' },
+            { name: '`/skillguides`', value: 'Search for skill guides on YouTube.<@&265252010524278786>' },
+            { name: '`/user`', value: 'Get Runemetrics statistics for a user.<@&265252010524278786>' },
+            { name: '`/ticket`', value: 'Open a ticket for support or help.<@&265252010524278786>' },
+            { name: '`/update_events`', value: 'Update the values of the current events.<@&265252010524278786>' },
+            { name: '`/eventinfo`', value: 'Information on how to setup an event.<@&265252010524278786>' },
+            { name: '`/reminder`', value: 'Sets user a reminder.<@&265252010524278786>' },
+            { name: '`/active_reminders`', value: 'Displays current reminders.<@&265252010524278786>' },
+            { name: '`/giveaway`', value: 'Host a clan giveaway.<@&265252010524278786>' },
+            { name: '`/future_giveaway`', value: 'Creates giveaway to be hosted.<@&265252010524278786>' },
+            { name: '`/status`', value: 'Update the statuses of the bots.<@&265252010524278786>' }
+        ];
+
+        // ---- Command rendering ----
+        function renderCommands(list, tbodyId) {
+            const tbody = document.getElementById(tbodyId);
+            tbody.innerHTML = '';
+            for (const cmd of list) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td><code>${cmd.name}</code></td><td>${cmd.value}</td>`;
+                tbody.appendChild(tr);
+            }
+        }
+
+        // ---- Role logic ----
+        function checkRoles() {
+            const discordName = document.getElementById('discord-name').value.trim();
+            const isAdmin = document.getElementById('admin-role').checked;
+            const isMember = document.getElementById('member-role').checked;
+
+            if (!discordName) {
+                alert("Please enter your Discord name.");
+                return false;
+            }
+            if (!isAdmin && !isMember) {
+                alert("Please select at least one role.");
+                return false;
+            }
+
+            // Show/hide switcher and lists
+            const switcher = document.getElementById('switcher-row');
+            const adminList = document.getElementById('adminCommandsList');
+            const memberList = document.getElementById('memberCommandsList');
+
+            // Show switcher only if both, else only one list
+            if (isAdmin && isMember) {
+                switcher.style.display = '';
+                showCommands('admin');
+            } else if (isAdmin) {
+                switcher.style.display = '';
+                showCommands('admin');
+                document.getElementById('memberBtn').style.display = 'none';
+            } else if (isMember) {
+                switcher.style.display = '';
+                showCommands('member');
+                document.getElementById('adminBtn').style.display = 'none';
+            }
+
+            // Render command tables
+            renderCommands(adminCommands, 'admin-commands-body');
+            renderCommands(memberCommands, 'member-commands-body');
+
+            // Hide both lists by default, show relevant one(s)
+            adminList.style.display = (isAdmin ? '' : 'none');
+            memberList.style.display = (isMember ? '' : 'none');
+
+            // Activate proper switcher button
+            document.getElementById('adminBtn').style.display = isAdmin ? '' : 'none';
+            document.getElementById('memberBtn').style.display = isMember ? '' : 'none';
+
+            // Save user role in session (for page refreshes, optional)
+            sessionStorage.setItem('discordName', discordName);
+            sessionStorage.setItem('isAdmin', isAdmin);
+            sessionStorage.setItem('isMember', isMember);
+
+            return false;
+        }
+
+        // ---- Switcher logic ----
+        function showCommands(role) {
+            const adminList = document.getElementById('adminCommandsList');
+            const memberList = document.getElementById('memberCommandsList');
+            const adminBtn = document.getElementById('adminBtn');
+            const memberBtn = document.getElementById('memberBtn');
+            if (role === 'admin') {
+                adminList.classList.add('active');
+                memberList.classList.remove('active');
+                adminBtn.classList.add('active');
+                memberBtn.classList.remove('active');
+            } else {
+                memberList.classList.add('active');
+                adminList.classList.remove('active');
+                memberBtn.classList.add('active');
+                adminBtn.classList.remove('active');
+            }
+        }
+
+        // ---- Restore session (optional) ----
+        window.onload = function() {
+            renderCommands(adminCommands, 'admin-commands-body');
+            renderCommands(memberCommands, 'member-commands-body');
+            const discordName = sessionStorage.getItem('discordName');
+            const isAdmin = sessionStorage.getItem('isAdmin') === 'true';
+            const isMember = sessionStorage.getItem('isMember') === 'true';
+            if (discordName) {
+                document.getElementById('discord-name').value = discordName;
+                document.getElementById('admin-role').checked = isAdmin;
+                document.getElementById('member-role').checked = isMember;
+                if (isAdmin || isMember) checkRoles();
+            }
+        };
+    </script>
+</body>
+</html>
