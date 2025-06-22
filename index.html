@@ -8,23 +8,6 @@
         body { font-family: 'Segoe UI', Arial, sans-serif; background: #23272a; color: #fff; margin: 0; }
         .container { max-width: 800px; margin:40px auto; background: #2c2f33; border-radius: 10px; padding: 30px 30px 20px 30px; box-shadow: 0 8px 24px rgba(0,0,0,.2);}
         h1 { text-align: center; font-weight: 700; }
-        .switcher { display: flex; justify-content: center; gap: 16px; margin: 24px 0;}
-        .switch-btn {
-            background: #7289da;
-            border: none;
-            color: #fff;
-            font-size: 1rem;
-            padding: 10px 24px;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: background .15s;
-        }
-        .switch-btn.active, .switch-btn:hover {
-            background: #99aab5;
-            color: #23272a;
-        }
-        .command-list { display: none; margin-top: 18px;}
-        .command-list.active { display: block;}
         .commands-table {
             width: 100%;
             border-collapse: collapse;
@@ -56,37 +39,16 @@
             font-size: 1rem;
         }
         .info { text-align: center; color: #aaa; margin-bottom: 14px;}
-        .admin-access-section {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 12px;
-        }
-        .admin-access-section input[type="password"] {
-            padding: 8px;
-            border-radius: 5px;
-            border: none;
-            width: 220px;
-            font-size: 1rem;
-            background: #23272a;
-            color: #fff;
-            outline: none;
-        }
         .locked-notice {
             color: #faa61a;
             background: #3a2c12;
             border-radius: 6px;
             padding: 12px 20px;
-            margin: 12px 0;
-            font-size: 1.05em;
+            margin: 18px 0 24px 0;
+            font-size: 1.08em;
             text-align: center;
             border: 1.5px solid #faa61a;
-        }
-        .password-error {
-            color: #e74c3c;
-            font-size: 0.95em;
-            margin-top: 4px;
+            font-weight: bold;
         }
         @media (max-width: 600px) {
             .container { padding: 10px; }
@@ -101,6 +63,10 @@
             Select your role to view available bot commands.<br>
             <small>(This does not log you into Discord or fetch live role data.)</small>
         </div>
+        <div class="locked-notice">
+            <strong>Admin Commands are locked.<br>
+            If you're a current Admin you will receive them via Direct Message, otherwise you can view the Members Commands only.</strong>
+        </div>
         <form id="role-check-form" class="role-input-section" autocomplete="off" onsubmit="return false;">
             <label>
                 <input type="checkbox" id="member-role" value="265252010524278786">
@@ -108,35 +74,7 @@
             </label>
             <button class="check-btn" onclick="checkRoles()">Show Commands</button>
         </form>
-
-        <div class="admin-access-section">
-            <div class="locked-notice" id="admin-lock-notice">
-                <strong>Admin Commands are locked.</strong><br>
-                To unlock the secrets of admin power, please consult with a server administrator and obtain the mystical access password.<br>
-                Only those worthy may proceed beyond this point!
-            </div>
-            <input type="password" id="admin-password" placeholder="Enter Admin Access Password">
-            <button class="check-btn" onclick="tryUnlockAdmin()">Unlock Admin Commands</button>
-            <div class="password-error" id="password-error" style="display:none;"></div>
-        </div>
-
-        <div id="switcher-row" class="switcher" style="display:none">
-            <button id="adminBtn" class="switch-btn" onclick="showCommands('admin')">Admin Commands</button>
-            <button id="memberBtn" class="switch-btn" onclick="showCommands('member')">Member Commands</button>
-        </div>
-        <div id="adminCommandsList" class="command-list">
-            <h2>Admin Commands <span style="font-size:0.8em; color:#faa61a;">(Requires <code>@admin</code> role)</span></h2>
-            <table class="commands-table">
-                <thead>
-                    <tr>
-                        <th>Command</th>
-                        <th>Description</th>
-                    </tr>
-                </thead>
-                <tbody id="admin-commands-body"></tbody>
-            </table>
-        </div>
-        <div id="memberCommandsList" class="command-list">
+        <div id="memberCommandsList" class="command-list active">
             <h2>Member Commands <span style="font-size:0.8em; color:#43b581;">(Requires <code>@member</code> role)</span></h2>
             <table class="commands-table">
                 <thead>
@@ -151,30 +89,6 @@
     </div>
     <script>
         // ---- Commands data ----
-        const adminCommands = [
-            { name: '`/forceping`', value: 'Ping used for @admin only.<@&324025299631079426>' },
-            { name: '`/forcegame`', value: 'Forcefully ping and unleash chaos mode on a user.<@&324025299631079426>' },
-            { name: '`/purge`', value: 'Deletes any message type! <@&324025299631079426>' },
-            { name: '`/warn`', value: 'Warn a user.<@&324025299631079426>' },
-            { name: '`/removewarn`', value: 'Remove a warning from a user.<@&324025299631079426>' },
-            { name: '`/mute`', value: 'Mute a user.<@&324025299631079426>' },
-            { name: '`/unmute`', value: 'Unmute a user.<@&324025299631079426>' },
-            { name: '`/removemutes`', value: 'Remove mutes from a user.<@&324025299631079426>' },
-            { name: '`/timeout `', value: 'Timeout a user.<@&324025299631079426>' },
-            { name: '`/removetimeout`', value: 'remove timeout from a user.<@&324025299631079426>' },
-            { name: '`/kick`', value: 'Kick a user from the server.<@&324025299631079426>' },
-            { name: '`/ticketclose`', value: 'Close a ticket.<@&324025299631079426>' },
-            { name: '`/forceticket`', value: 'Forcefully open a ticket upon a user.<@&324025299631079426>' },
-            { name: '`/announcemnt', value: 'Send a announcment template.<@&324025299631079426>' },
-            { name: '`/edit_announcement`', value: 'Edit a field in the announcement.<@&324025299631079426>' },
-            { name: '`/remove_announcment`', value: 'Remove a field in the announcement.<@&324025299631079426>' },
-            { name: '`/archive`', value: 'Copy existing channel into backup channel.<@&324025299631079426>' },
-            { name: '`/embed`', value: 'Create a custom embed.<@&324025299631079426>' },
-            { name: '`/edit_embeds`', value: 'Edit custom embed.<@&324025299631079426>' },
-            { name: '`/end_giveaway`', value: 'Ends the giveaway.<@&324025299631079426>' },
-            { name: '`/help_announcement`', value: 'Instructions on how to use/edit the announcement.<@&324025299631079426>' },
-            { name: '`/post_status`', value: 'Creates a custom status embed for all bots.<@&324025299631079426>' }
-        ];
         const memberCommands = [
             { name: '`/ranklist`', value: 'Display all clan ranks and their emojis.<@&265252010524278786>' },
             { name: '`/ping`', value: 'Ping @user!<@&265252010524278786>' },
@@ -196,7 +110,6 @@
         // ---- Role highlighting utility ----
         function highlightRoles(text) {
             return text
-                .replace(/<@&324025299631079426>/g, '<span style="color:#faa61a;font-weight:bold">@admin</span>')
                 .replace(/<@&265252010524278786>/g, '<span style="color:#43b581;font-weight:bold">@member</span>');
         }
 
@@ -211,100 +124,16 @@
             }
         }
 
-        // ---- Show member commands or both ----
+        // ---- Show commands if checkbox is checked ----
         function checkRoles() {
             const isMember = document.getElementById('member-role').checked;
-            const isAdminUnlocked = sessionStorage.getItem('adminUnlocked') === 'true';
-
-            // Show/hide switcher and lists
-            const switcher = document.getElementById('switcher-row');
-            const adminList = document.getElementById('adminCommandsList');
             const memberList = document.getElementById('memberCommandsList');
-            const adminBtn = document.getElementById('adminBtn');
-            const memberBtn = document.getElementById('memberBtn');
-
-            // If both roles: show switcher, else only show one
-            if (isAdminUnlocked && isMember) {
-                switcher.style.display = '';
-                showCommands('admin');
-            } else if (isAdminUnlocked) {
-                switcher.style.display = '';
-                showCommands('admin');
-                memberBtn.style.display = 'none';
-            } else if (isMember) {
-                switcher.style.display = '';
-                showCommands('member');
-                adminBtn.style.display = 'none';
-            } else {
-                switcher.style.display = 'none';
-                adminList.style.display = 'none';
-                memberList.style.display = 'none';
-            }
-
-            // Render command tables
-            renderCommands(adminCommands, 'admin-commands-body');
-            renderCommands(memberCommands, 'member-commands-body');
-
-            // Show/hide lists
-            adminList.style.display = isAdminUnlocked ? '' : 'none';
             memberList.style.display = isMember ? '' : 'none';
-
-            // Activate proper switcher button
-            adminBtn.style.display = isAdminUnlocked ? '' : 'none';
-            memberBtn.style.display = isMember ? '' : 'none';
-
-            // Save member role in session (for page refresh)
-            sessionStorage.setItem('isMember', isMember);
         }
 
-        // ---- Password unlock logic ----
-        function tryUnlockAdmin() {
-            const password = document.getElementById('admin-password').value;
-            const errorDiv = document.getElementById('password-error');
-            // CHANGE THIS PASSWORD to your secret
-          
-
-            if (password === correctPassword) {
-                sessionStorage.setItem('adminUnlocked', 'true');
-                errorDiv.style.display = 'none';
-                document.getElementById('admin-lock-notice').innerHTML = "<span style='color:#43b581;font-weight:bold;'>Admin access granted! You may now browse the admin commands.</span>";
-                document.getElementById('admin-password').value = "";
-                checkRoles();
-            } else {
-                sessionStorage.setItem('adminUnlocked', 'false');
-                errorDiv.textContent = "Incorrect password. Please try again, or consult a server admin for access.";
-                errorDiv.style.display = 'block';
-                checkRoles();
-            }
-        }
-
-        // ---- Switcher logic ----
-        function showCommands(role) {
-            const adminList = document.getElementById('adminCommandsList');
-            const memberList = document.getElementById('memberCommandsList');
-            const adminBtn = document.getElementById('adminBtn');
-            const memberBtn = document.getElementById('memberBtn');
-            if (role === 'admin') {
-                adminList.classList.add('active');
-                memberList.classList.remove('active');
-                adminBtn.classList.add('active');
-                memberBtn.classList.remove('active');
-            } else {
-                memberList.classList.add('active');
-                adminList.classList.remove('active');
-                memberBtn.classList.add('active');
-                adminBtn.classList.remove('active');
-            }
-        }
-
-        // ---- Restore session (optional) ----
+        // ---- Render member commands on load ----
         window.onload = function() {
-            renderCommands(adminCommands, 'admin-commands-body');
             renderCommands(memberCommands, 'member-commands-body');
-            const isMember = sessionStorage.getItem('isMember') === 'true';
-            const isAdminUnlocked = sessionStorage.getItem('adminUnlocked') === 'true';
-            document.getElementById('member-role').checked = isMember;
-            if (isMember || isAdminUnlocked) checkRoles();
         };
     </script>
 </body>
