@@ -216,23 +216,28 @@
         </div>
     </div>
     <script>
+        
         // ---- Commands data ----
         const memberCommands = [
-            { name: '`/ranklist`', value: 'Display all clan ranks and their emojis.' },
-            { name: '`/ping`', value: 'Ping @user!' },
+            { name: '`/active_reminders`', value: 'View your active reminders.' },
+            { name: '`/commands`', value: 'Browse all bot commands in your browser.' },
+            { name: '`/eventinfo`', value: 'Displays information on how to host an event.' },
+            { name: '`/events`', value: 'Create an event with optional start/end dates. Defaults to midnight.' },
+            { name: '`/feedback`', value: 'Send feedback to the server.' },
+            { name: '`/future_event`', value: 'Post an upcoming event announcement.' },
+            { name: '`/future_giveaway`', value: 'Post details of an upcoming giveaway.' },
             { name: '`/game`', value: 'Generates random game phrases or system chaos message.' },
-            { name: '`/events`', value: 'Create an event announcement in the events channel.' },
-            { name: '`/feedback`', value: 'Send feedback on the bot or ideas!' },
+            { name: '`/giveaway`', value: 'Create a giveaway with optional start/end dates. Defaults to midnight.' },
+            { name: '`/ping`', value: 'Pings a selected user.' },
+            { name: '`/ranklist`', value: 'Displays all available clan ranks and their emojis.' },
+            { name: '`/refresh_timer`', value: 'Recover and refresh an event/giveaway timer from its original message ID.' },
+            { name: '`/reminder`', value: 'Set a reminder.' },
             { name: '`/skillguides`', value: 'Search for skill guides on YouTube.' },
-            { name: '`/user`', value: 'Get Runemetrics statistics for a user.' },
-            { name: '`/ticket`', value: 'Open a ticket for support or help.' },
-            { name: '`/update_events`', value: 'Update the values of the current events.' },
-            { name: '`/eventinfo`', value: 'Information on how to setup an event.' },
-            { name: '`/reminder`', value: 'Sets user a reminder.' },
-            { name: '`/active_reminders`', value: 'Displays current reminders.' },
-            { name: '`/giveaway`', value: 'Host a clan giveaway.' },
-            { name: '`/future_giveaway`', value: 'Creates giveaway to be hosted.' },
-            { name: '`/status`', value: 'Update the statuses of the bots.' }
+            { name: '`/status`', value: 'Post a status report for the bots.' },
+            { name: '`/ticket`', value: 'Create a ticket thread for support.' },
+            { name: '`/update_event`', value: 'Update an event or giveaway embed and its countdown.' },
+            { name: '`/update_giveaway`', value: 'Update only the giveaway fields you supply. Keep all other details.' },
+            { name: '`/user`', value: 'Fetches RuneMetrics data for a specified user.' }
         ];
 
         // ---- Command rendering ----
